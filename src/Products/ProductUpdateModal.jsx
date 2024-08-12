@@ -17,14 +17,15 @@ const ProductUpdateModal = ({
     setSku,
     setCategoryId,
     categories,
-    updateProduct
+    updateProduct,
+    setVariablesToDefault
 }) => {
 
     return(
         <>
-            {/* Add Product */}
+            {/* Update Product */}
             <Modal show={showUpdateModal} onHide={makeUpdateModalAppear}>
-            <Modal.Header closeButton>
+            <Modal.Header closeButton onClick={setVariablesToDefault}>
                 <b className='bold-color'>Update Product</b>
             </Modal.Header>
             <Modal.Body>

@@ -101,9 +101,6 @@ const Products = () => {
         setUnit(unit);
         setSku(sku);
         setCategoryId(categoryId);
-
-        console.log(productName);
-        console.log(sku);
     }
 
     // Add Product
@@ -236,6 +233,8 @@ const Products = () => {
                 setCategoryId={setCategoryId}
                 categories={categories}
                 updateProduct={updateProduct}
+
+                setVariablesToDefault={setVariablesToDefault}
             />
 
             {/* Delete Product */}
