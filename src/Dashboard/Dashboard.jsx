@@ -47,37 +47,64 @@ const Dashboard = () => {
         return total.toFixed(2);
     };
 
-    // Save Transaction
     const saveTransaction = async () => {
         const transactionAmount = calculateTotal();
-
-        const dataToSend = {
-            "transactionDate": new Date().toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            }),
-
-            "totalAmount": transactionAmount,
-        }
-
-        const response = await fetch(
-            API_BASE_URL +
-            "/api/TransactionHistoryApi/SaveTransaction",
+    
+        // Save the transaction
+        const transactionResponse = await fetch(
+            API_BASE_URL + "/api/TransactionHistoryApi/SaveTransaction",
             {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(dataToSend)
+                body: JSON.stringify({
+                    "transactionDate": new Date().toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }),
+                    "totalAmount": transactionAmount,
+                })
             }
         );
-
-        if (response.ok) {
-            await getProducts();
-            toast.success('Transaction saved successfully');
-            console.log('transaction saved successfully');
-            setCheckOut([]);
+    
+        if (transactionResponse.ok) {
+            const transaction = await transactionResponse.json();
+            const transactionId = transaction[0]?.transactionId; // Get the transactionId from the response
+            console.log('Transaction ID:', transactionId);
+    
+            if (transactionId) {
+                // Save each transaction product
+                const saveProductPromises = checkOut.map(item => 
+                    fetch(
+                        API_BASE_URL + "/api/TransactionProductApi/SaveTransactionProduct",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                transactionId,
+                                productId: item.productId,
+                                quantity: item.quantity
+                            })
+                        }
+                    )
+                );
+    
+                const productResponses = await Promise.all(saveProductPromises);
+    
+                if (productResponses.every(res => res.ok)) {
+                    await getProducts();
+                    toast.success('Transaction saved successfully');
+                    setCheckOut([]);
+                } else {
+                    toast.error('Failed to save some transaction products');
+                }
+            } else {
+                toast.error('Failed to retrieve transaction ID');
+            }
         } else {
             toast.error('Failed to save transaction');
         }
@@ -130,16 +157,15 @@ const Dashboard = () => {
                                         <tbody>
                                             {checkOut.map(item => (
                                                 <tr key={item.productId}>
-
                                                     <td>{item.productName}</td>
                                                     <td>${item.price}</td>
                                                     <td style={{ background: '', display: 'flex', justifyContent: 'space-around' }}>
-                                                        <i class='bx bxs-minus-circle bx-quantity-icon' onClick={() => handleQuantityChange(item.productId, -1)} />
+                                                        <i className='bx bxs-minus-circle bx-quantity-icon' onClick={() => handleQuantityChange(item.productId, -1)} />
                                                         <span style={{ paddingLeft: '8px', paddingRight: '8px' }}>{item.quantity}</span>
-                                                        <i class='bx bxs-plus-circle bx-quantity-icon' onClick={() => handleQuantityChange(item.productId, 1)} />
+                                                        <i className='bx bxs-plus-circle bx-quantity-icon' onClick={() => handleQuantityChange(item.productId, 1)} />
                                                     </td>
                                                     <td className='trash-column'>
-                                                        <i class='bx bxs-trash' onClick={() => handleSelectProduct(item)} style={{ textAlign: 'center' }}></i>
+                                                        <i className='bx bxs-trash' onClick={() => handleSelectProduct(item)} style={{ textAlign: 'center' }}></i>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -188,7 +214,8 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                             </>
-                        )}
+                        )
+                    }
                 </div>
             </div>
 
