@@ -77,6 +77,7 @@ const Dashboard = () => {
             await getProducts();
             toast.success('Transaction saved successfully');
             console.log('transaction saved successfully');
+            setCheckOut([]);
         } else {
             toast.error('Failed to save transaction');
         }
