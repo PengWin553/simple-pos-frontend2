@@ -34,7 +34,7 @@ const ProductAddModal = ({
     return (
         <Modal show={showAddModal} onHide={() => makeAddModalAppear(false)}>
             <Modal.Header closeButton>
-                <Modal.Title>New Product</Modal.Title>
+                <b className='bold-color'>New Product</b>
             </Modal.Header>
             <Modal.Body>
                 <div className="form-group">

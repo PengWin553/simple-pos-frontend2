@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import API_BASE_URL from '../config.js';
-import { Modal} from 'react-bootstrap';
+import TransactionDetailsModal from './TransactionDetailsModal.jsx';
 
 const Transactions = () => {
 
@@ -64,6 +64,15 @@ const Transactions = () => {
 
     return (
         <>
+            {/* Show Transacton Details Modal */}
+            <TransactionDetailsModal
+                showModal={showModal}
+                makeShowModalAppear={makeShowModalAppear}
+                productDetails={productDetails}
+                totalPayment={totalPayment}
+                transactionDate={transactionDate}
+            />
+
             {/* Display All Transaction History Data */}
             <div className="crud-content-container">
                 <br></br>
@@ -96,39 +105,6 @@ const Transactions = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Modal to display product details */}
-            <Modal show={showModal} onHide={makeShowModalAppear}>
-                <Modal.Header closeButton>
-                    <b className='bold-color'>Transaction Details</b>
-                </Modal.Header>
-                <Modal.Body>
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>Product Name</th>
-                                <th>Price</th>
-                                <th>Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {productDetails.map((product, index) => (
-                                <tr key={index}>
-                                    <td>{product.productName}</td>
-                                    <td>${product.price}</td>
-                                    <td>{product.quantity}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </Modal.Body>
-                <Modal.Body>
-                    <div className="footer-container">
-                        <p> <b>Total: </b> ${totalPayment}</p>
-                        <p> <b>Date: </b> {transactionDate}</p>
-                    </div>
-                </Modal.Body>
-            </Modal>
         </>
     );
 }
