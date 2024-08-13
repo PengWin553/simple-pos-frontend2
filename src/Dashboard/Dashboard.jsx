@@ -15,13 +15,18 @@ const Dashboard = () => {
         );
         const result = await response.json();
         setProducts(result);
-    }
+    };
 
     useEffect(() => {
         getProducts();
     }, []);
 
     const handleSelectProduct = (product) => {
+        if (product.stock === 0) {
+            toast.error(`${product.productName} is out of stock!`);
+            return;
+        }
+
         setCheckOut((prevCheckOut) => {
             const existingProduct = prevCheckOut.find(item => item.productId === product.productId);
             if (existingProduct) {
@@ -34,11 +39,20 @@ const Dashboard = () => {
 
     const handleQuantityChange = (productId, change) => {
         setCheckOut(prevCheckOut =>
-            prevCheckOut.map(item =>
-                item.productId === productId
-                    ? { ...item, quantity: Math.max(1, item.quantity + change) }
-                    : item
-            )
+            prevCheckOut.map(item => {
+                if (item.productId === productId) {
+                    const newQuantity = item.quantity + change;
+                    if (newQuantity > item.stock) {
+                        toast.error(`Cannot add more than ${item.stock} to the cart.`);
+                        return item; // Return the item without changes
+                    } else if (newQuantity < 1) {
+                        return { ...item, quantity: 1 }; // Ensure quantity does not go below 1
+                    } else {
+                        return { ...item, quantity: newQuantity };
+                    }
+                }
+                return item;
+            })
         );
     };
 
@@ -49,8 +63,7 @@ const Dashboard = () => {
 
     const saveTransaction = async () => {
         const transactionAmount = calculateTotal();
-    
-        // Save the transaction
+
         const transactionResponse = await fetch(
             API_BASE_URL + "/api/TransactionHistoryApi/SaveTransaction",
             {
@@ -72,15 +85,13 @@ const Dashboard = () => {
                 })
             }
         );
-    
+
         if (transactionResponse.ok) {
             const transaction = await transactionResponse.json();
-            const transactionId = transaction[0]?.transactionId; // Get the transactionId from the response
-            console.log('Transaction ID:', transactionId);
-    
+            const transactionId = transaction[0]?.transactionId;
+
             if (transactionId) {
-                // Save each transaction product
-                const saveProductPromises = checkOut.map(item => 
+                const saveProductPromises = checkOut.map(item =>
                     fetch(
                         API_BASE_URL + "/api/TransactionProductApi/SaveTransactionProduct",
                         {
@@ -96,9 +107,9 @@ const Dashboard = () => {
                         }
                     )
                 );
-    
+
                 const productResponses = await Promise.all(saveProductPromises);
-    
+
                 if (productResponses.every(res => res.ok)) {
                     await getProducts();
                     toast.success('Transaction saved successfully');
@@ -125,11 +136,11 @@ const Dashboard = () => {
                                 className="product-card"
                                 htmlFor={`checkbox-${p.productId}`}
                                 onClick={() => handleSelectProduct(p)}
-                                style={{ cursor: 'pointer' }}
                             >
                                 <img src={creeperHead} alt="a creeper head" />
                                 <h3 className='product-name'>{p.productName}</h3>
                                 <p className='product-price'>${p.price}</p>
+                                <p className='product-price'>Stock: {p.stock}</p>
                                 <input
                                     id={`checkbox-${p.productId}`}
                                     type="checkbox"
@@ -163,13 +174,13 @@ const Dashboard = () => {
                                                 <tr key={item.productId}>
                                                     <td>{item.productName}</td>
                                                     <td>${item.price}</td>
-                                                    <td style={{ background: '', display: 'flex', justifyContent: 'space-around' }}>
+                                                    <td style={{ display: 'flex', justifyContent: 'space-around' }}>
                                                         <i className='bx bxs-minus-circle bx-quantity-icon' onClick={() => handleQuantityChange(item.productId, -1)} />
-                                                        <span style={{ paddingLeft: '8px', paddingRight: '8px' }}>{item.quantity}</span>
+                                                        <span>{item.quantity}</span>
                                                         <i className='bx bxs-plus-circle bx-quantity-icon' onClick={() => handleQuantityChange(item.productId, 1)} />
                                                     </td>
-                                                    <td className='trash-column'>
-                                                        <i className='bx bxs-trash' onClick={() => handleSelectProduct(item)} style={{ textAlign: 'center' }}></i>
+                                                    <td>
+                                                        <i className='bx bxs-trash bx-trash' onClick={() => setCheckOut(checkOut.filter(i => i.productId !== item.productId))} />
                                                     </td>
                                                 </tr>
                                             ))}
@@ -187,45 +198,18 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                             </>
-                        ) : (
-                            <>
-                                <table className="checkout-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Price</th>
-                                            <th>Quantity</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-                                <div className="foot">
-                                    <div className="total-container">
-                                        <h6 colSpan="3"><strong>Total:</strong></h6>
-                                        <h6>$0</h6>
-                                    </div>
-                                    <div className="checkout-btn-container">
-                                        <button className='checkout-btn'>Checkout</button>
-                                    </div>
-                                </div>
-                            </>
+                        )
+                        : (
+                            <div style={{ textAlign: 'center', padding: '30px' }}>
+                                No products selected yet!
+                            </div>
                         )
                     }
                 </div>
             </div>
-
             <Toaster expand={true} richColors position='bottom-right' className='mr-8'></Toaster>
         </>
-    )
-}
+    );
+};
 
 export default Dashboard;
