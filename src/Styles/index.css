@@ -416,7 +416,7 @@ tr .action-btn{
 }
 
 .product-price{
-  color: rgb(67, 75, 149);
+  color: #761d8f
 }
 
 @media (max-width: 768px) {
@@ -565,4 +565,13 @@ h5{
   padding-top: 1em;
   margin-top: -1em;
   border-top: 2px dashed #4b4b4b27;
+}
+
+.product-card{
+  cursor: pointer;
+}
+
+.product-card.out-of-stock {
+  background-color: #dcdada;
+  cursor: not-allowed;
 }

@@ -9,10 +9,7 @@ const Dashboard = () => {
     const [checkOut, setCheckOut] = useState([]);
 
     const getProducts = async () => {
-        const response = await fetch(
-            API_BASE_URL +
-            "/api/ProductApi/GetProducts"
-        );
+        const response = await fetch(API_BASE_URL + "/api/ProductApi/GetProducts");
         const result = await response.json();
         setProducts(result);
     };
@@ -64,27 +61,24 @@ const Dashboard = () => {
     const saveTransaction = async () => {
         const transactionAmount = calculateTotal();
 
-        const transactionResponse = await fetch(
-            API_BASE_URL + "/api/TransactionHistoryApi/SaveTransaction",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "transactionDate": new Date().toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    }) + ' ' + new Date().toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: 'numeric',
-                        hour12: true
-                    }),
-                    "totalAmount": transactionAmount,
-                })
-            }
-        );
+        const transactionResponse = await fetch(API_BASE_URL + "/api/TransactionHistoryApi/SaveTransaction", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "transactionDate": new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }) + ' ' + new Date().toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: true
+                }),
+                "totalAmount": transactionAmount,
+            })
+        });
 
         if (transactionResponse.ok) {
             const transaction = await transactionResponse.json();
@@ -92,28 +86,38 @@ const Dashboard = () => {
 
             if (transactionId) {
                 const saveProductPromises = checkOut.map(item =>
-                    fetch(
-                        API_BASE_URL + "/api/TransactionProductApi/SaveTransactionProduct",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                transactionId,
-                                productId: item.productId,
-                                quantity: item.quantity
-                            })
-                        }
-                    )
+                    fetch(API_BASE_URL + "/api/TransactionProductApi/SaveTransactionProduct", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            transactionId,
+                            productId: item.productId,
+                            quantity: item.quantity
+                        })
+                    })
                 );
 
                 const productResponses = await Promise.all(saveProductPromises);
 
                 if (productResponses.every(res => res.ok)) {
-                    await getProducts();
-                    toast.success('Transaction saved successfully');
-                    setCheckOut([]);
+                    // Update stock for each product after saving transaction products
+                    const updateStockPromises = checkOut.map(item =>
+                        fetch(API_BASE_URL + `/api/ProductApi/UpdateProductStock?id=${item.productId}&quantity=${item.quantity}`, {
+                            method: "PUT",
+                        })
+                    );
+
+                    const stockResponses = await Promise.all(updateStockPromises);
+
+                    if (stockResponses.every(res => res.ok)) {
+                        await getProducts();
+                        toast.success('Transaction saved successfully');
+                        setCheckOut([]);
+                    } else {
+                        toast.error('Failed to update stock for some products');
+                    }
                 } else {
                     toast.error('Failed to save some transaction products');
                 }
@@ -133,9 +137,9 @@ const Dashboard = () => {
                         {products.map((p) => (
                             <label
                                 key={p.productId}
-                                className="product-card"
+                                className={`product-card ${p.stock === 0 ? 'out-of-stock' : ''}`}
                                 htmlFor={`checkbox-${p.productId}`}
-                                onClick={() => handleSelectProduct(p)}
+                                onClick={() => p.stock > 0 && handleSelectProduct(p)}
                             >
                                 <img src={creeperHead} alt="a creeper head" />
                                 <h3 className='product-name'>{p.productName}</h3>
