@@ -254,7 +254,7 @@ const Products = () => {
 
                 {/* Display All Product Data */}
                 <div className="table-container">
-                    <div className="fixTableHead">
+                    <div className="fixTableHead" style={{backgroundColor: '#eaebeb'}}>
                         <table>
                             <thead>
                                 <tr>

@@ -67,8 +67,10 @@ const Transactions = () => {
             {/* Display All Transaction History Data */}
             <div className="crud-content-container">
                 <br></br>
+                <strong><h5>Transaction History</h5></strong>
+                <br></br>
                 <div className="table-container">
-                    <div className="fixTableHead Narrow">
+                    <div className="fixTableHead Narrow" style={{backgroundColor: '#eaebeb'}}>
                         <table>
                             <thead>
                                 <tr>

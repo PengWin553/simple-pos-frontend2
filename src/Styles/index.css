@@ -321,12 +321,14 @@ tr .action-btn{
   width: 1200px;
   margin: 0 auto;
   max-width: 100%;
-  background: #f3eaea;
 }
 
 .Narrow{
   width: 1000px;
+/* background: #eaebeb; */
+
 }
+
 
 /* New styles for card layout */
 .card-content-container {
@@ -466,7 +468,7 @@ h5{
 }
 
 .bx-quantity-icon{
-  font-size: 25px;
+  font-size: 20px;
   color: #a59ed7;
 }
 

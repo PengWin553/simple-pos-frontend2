@@ -63,6 +63,10 @@ const Dashboard = () => {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric'
+                    }) + ' ' + new Date().toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: 'numeric',
+                        hour12: true
                     }),
                     "totalAmount": transactionAmount,
                 })

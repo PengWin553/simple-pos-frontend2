@@ -174,7 +174,7 @@ const Categories = () => {
                 </div>
 
                 <div className="table-container">
-                    <div className="fixTableHead Narrow">
+                    <div className="fixTableHead Narrow" style={{backgroundColor: '#eaebeb'}}>
                         <table>
                             <thead>
                                 <tr>
