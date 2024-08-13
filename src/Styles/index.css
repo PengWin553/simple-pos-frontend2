@@ -197,6 +197,10 @@ th {
   border-radius: 15px;
   background-color: white;
 }
+/* 
+.add-client-btn{
+  margin-right: -45.3rem;
+} */
 
 tr .action-btn{
  color: white;
@@ -317,6 +321,11 @@ tr .action-btn{
   width: 1200px;
   margin: 0 auto;
   max-width: 100%;
+  background: #f3eaea;
+}
+
+.Narrow{
+  width: 1000px;
 }
 
 /* New styles for card layout */
@@ -546,4 +555,12 @@ h5{
   flex-direction: column;
   position: relative;
   margin-left: -0.7em;
+}
+
+.footer-container{
+  /* background: yellow; */
+  padding-left: 0.3em;
+  padding-top: 1em;
+  margin-top: -1em;
+  border-top: 2px dashed #4b4b4b27;
 }
