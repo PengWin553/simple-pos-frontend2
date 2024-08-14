@@ -81,7 +81,7 @@ const Dashboard = () => {
 
     const saveTransaction = async () => {
         const transactionAmount = calculateTotal();
-
+    
         const transactionResponse = await fetch(API_BASE_URL + "/api/TransactionHistoryApi/SaveTransaction", {
             method: "POST",
             headers: {
@@ -92,31 +92,29 @@ const Dashboard = () => {
                 totalAmount: transactionAmount,
             })
         });
-
+    
         if (transactionResponse.ok) {
             const transaction = await transactionResponse.json();
             const transactionId = transaction[0]?.transactionId;
-
+    
             if (transactionId) {
-                const saveProductPromises = checkOut.map(item =>
-                    fetch(API_BASE_URL + "/api/TransactionProductApi/SaveTransactionProduct", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            transactionId,
-                            productId: item.productId,
-                            quantity: item.quantity
-                        })
-                    })
-                );
-
-                const productResponses = await Promise.all(saveProductPromises);
-
-                if (productResponses.every(res => res.ok)) {
+                const transactionProducts = checkOut.map(item => ({
+                    transactionId,
+                    productId: item.productId,
+                    quantity: item.quantity
+                }));
+    
+                const productResponse = await fetch(API_BASE_URL + "/api/TransactionProductApi/SaveTransactionProductsBatch", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(transactionProducts)
+                });
+    
+                if (productResponse.ok) {
                     const stockUpdateSuccess = await updateProductStocks(checkOut);
-
+    
                     if (stockUpdateSuccess) {
                         await getProducts();
                         toast.success('Transaction saved successfully');
@@ -125,7 +123,7 @@ const Dashboard = () => {
                         toast.error('Failed to update stock for some products');
                     }
                 } else {
-                    toast.error('Failed to save some transaction products');
+                    toast.error('Failed to save transaction products');
                 }
             } else {
                 toast.error('Failed to retrieve transaction ID');
