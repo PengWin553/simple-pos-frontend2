@@ -58,6 +58,27 @@ const Dashboard = () => {
         return total.toFixed(2);
     };
 
+    const updateProductStocks = async (products) => {
+        const updateData = products.map(item => ({
+            productId: item.productId,
+            quantity: item.quantity
+        }));
+
+        const response = await fetch(API_BASE_URL + "/api/ProductApi/UpdateProductStocks", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(updateData)
+        });
+
+        if (response.ok) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
     const saveTransaction = async () => {
         const transactionAmount = calculateTotal();
 
@@ -67,16 +88,8 @@ const Dashboard = () => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                "transactionDate": new Date().toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                }) + ' ' + new Date().toLocaleTimeString('en-US', {
-                    hour: 'numeric',
-                    minute: 'numeric',
-                    hour12: true
-                }),
-                "totalAmount": transactionAmount,
+                transactionDate: new Date().toLocaleString('en-US'),
+                totalAmount: transactionAmount,
             })
         });
 
@@ -102,16 +115,9 @@ const Dashboard = () => {
                 const productResponses = await Promise.all(saveProductPromises);
 
                 if (productResponses.every(res => res.ok)) {
-                    // Update stock for each product after saving transaction products
-                    const updateStockPromises = checkOut.map(item =>
-                        fetch(API_BASE_URL + `/api/ProductApi/UpdateProductStock?id=${item.productId}&quantity=${item.quantity}`, {
-                            method: "PUT",
-                        })
-                    );
+                    const stockUpdateSuccess = await updateProductStocks(checkOut);
 
-                    const stockResponses = await Promise.all(updateStockPromises);
-
-                    if (stockResponses.every(res => res.ok)) {
+                    if (stockUpdateSuccess) {
                         await getProducts();
                         toast.success('Transaction saved successfully');
                         setCheckOut([]);
@@ -127,7 +133,7 @@ const Dashboard = () => {
         } else {
             toast.error('Failed to save transaction');
         }
-    }
+    };
 
     return (
         <>
@@ -211,6 +217,7 @@ const Dashboard = () => {
                     }
                 </div>
             </div>
+            
             <Toaster expand={true} richColors position='bottom-right' className='mr-8'></Toaster>
         </>
     );
