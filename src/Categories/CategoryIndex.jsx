@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { Toaster, toast } from 'sonner';
 
 // import CategoryAddModal
-import CategoryAddModal from './CategoryAddModal.jsx';
+import CategoryAddModal from './CategoryModals/CategoryAddModal.jsx';
 
 // import CategoryUpdateModal
-import CategoryUpdateModal from './CategoryUpdateModal.jsx';
+import CategoryUpdateModal from './CategoryModals/CategoryUpdateModal.jsx';
 
 // import CategoryDeleteModal
-import CategoryDeleteModal from './CategoryDeleteModal.jsx';
+import CategoryDeleteModal from './CategoryModals/CategoryDeleteModal.jsx';
+
 import API_BASE_URL from '../config.js';
 
 const Categories = () => {

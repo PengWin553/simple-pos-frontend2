@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import API_BASE_URL from '../config.js';
-import TransactionDetailsModal from './TransactionDetailsModal.jsx';
+import TransactionDetailsModal from './TransactionModals/TransactionDetailsModal.jsx';
 
 const Transactions = () => {
 

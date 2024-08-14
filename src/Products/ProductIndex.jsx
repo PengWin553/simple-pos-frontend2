@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { Toaster, toast } from 'sonner';
 
 // import ProductAddModal
-import ProductAddModal from './ProductAddModal.jsx';
+import ProductAddModal from './ProductModals/ProductAddModal.jsx';
 
 // import ProductUpdateModal
-import ProductUpdateModal from './ProductUpdateModal.jsx';
+import ProductUpdateModal from './ProductModals/ProductUpdateModal.jsx';
 
 // import ProductDeleteModal
-import ProductDeleteModal from './ProductDeleteModal.jsx';
+import ProductDeleteModal from './ProductModals/ProductDeleteModal.jsx';
 import API_BASE_URL from '../config.js';
 
 const Products = () => {
